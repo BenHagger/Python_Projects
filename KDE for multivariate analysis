@@ -1,0 +1,26 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
+from scipy.stats import iqr
+
+# Simulating your data
+nrml = np.random.exponential(0.7, 100000)*1000000
+
+# Using the Freedman-Diaconis rule to determine the bin width and number of bins
+bin_width = 2.59 * iqr(nrml) / (len(nrml) ** (1/3))
+num_bins = round((max(nrml) - min(nrml)) / bin_width)
+
+# Fitting the KDE
+x_kernel = gaussian_kde(nrml)
+bw = x_kernel.factor * np.std(nrml)
+x_axis = np.linspace(0, max(nrml), 1000)
+x_val = x_kernel.evaluate(x_axis)
+
+
+# Plotting
+plt.hist(nrml, bins=num_bins, alpha=0.5, density=True, edgecolor='Black')
+plt.plot(x_axis, x_val, 'red')
+plt.title('Custom Distribution with Adjusted KDE')
+plt.ylabel('Density')
+plt.xlabel('Value')
+plt.show()
