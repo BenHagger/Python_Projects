@@ -16,6 +16,15 @@ bw = x_kernel.factor * np.std(nrml)
 x_axis = np.linspace(0, max(nrml), 1000)
 x_val = x_kernel.evaluate(x_axis)
 
+
+nrml = nrml.reshape(-1, 1)  # Reshape data for sklearn
+
+# Grid search for optimal bandwidth selection
+
+
+# Fitting the Kernel Density with 'exponential' kernel using the best bandwidth
+kde_sklearn = KernelDensity(kernel='exponential').fit(nrml)
+
 # Function to evaluate the KDE over a range
 def evaluate_kde_sklearn(kde, values):
     return np.exp(kde.score_samples(values.reshape(-1, 1)))  # score_samples returns the log of the probability density
