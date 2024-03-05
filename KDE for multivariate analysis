@@ -16,6 +16,21 @@ bw = x_kernel.factor * np.std(nrml)
 x_axis = np.linspace(0, max(nrml), 1000)
 x_val = x_kernel.evaluate(x_axis)
 
+# Function to evaluate the KDE over a range
+def evaluate_kde_sklearn(kde, values):
+    return np.exp(kde.score_samples(values.reshape(-1, 1)))  # score_samples returns the log of the probability density
+
+# Function to calculate the CDF using the KDE
+def kde_cdf_sklearn(kde, x_min, x_max):
+    result, _ = quad(lambda x:np.array([x])* evaluate_kde_sklearn(kde, np.array([x])), x_min, x_max, limit = 100)
+    return result
+
+# Evaluate P(X <= 6000000) for the sklearn KDE
+x_min = 0  # Starting point for integration
+x_target = 600000  # Target volume
+cdf_value_sklearn = kde_cdf_sklearn(kde_sklearn, x_min, x_target)
+
+cdf_value_sklearn
 
 # Plotting
 plt.hist(nrml, bins=num_bins, alpha=0.5, density=True, edgecolor='Black')
