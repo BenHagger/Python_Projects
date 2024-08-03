@@ -1,0 +1,48 @@
+import numpy as np
+from scipy.interpolate import LinearNDInterpolator
+##
+"
+Script objective is to reverse-interpolate to find maturities of a curve given a yield input, but for multiple currencies
+achieves this by formatting the problem as a 3d surface
+x: integer values to represent the currency
+y: swap points of each currency
+z: maturiety, to map against the swap points
+
+essentially we combine a 2d curves into a 3d surface, and input (currency integer, yield value) and interopolate against a third axis
+this enables us to use vectorised operations, rather than looping throguh each curve value/currency and interpolating individually 
+"
+##
+def find_maturities(swap_curves, given_yields, num_currencies=5, num_maturities=10):
+    """
+    Perform 3D interpolation to find maturities for given yields across multiple swap curves.
+
+    Parameters:
+    swap_curves (np.ndarray): A 2D array (matrix) representing the swap curves with yields.
+    given_yields (np.ndarray): A 1D array of target yields for which to find corresponding maturities.
+    num_currencies (int): Number of currencies (rows in the swap curve matrix).
+    num_maturities (int): Number of maturities (columns in the swap curve matrix).
+
+    Returns:
+    np.ndarray: A 1D array of maturities corresponding to each given yield and currency.
+    """
+    # Define the yields and maturities
+    yields = swap_curves.flatten()
+    currencies = np.repeat(np.arange(1, num_currencies + 1), num_maturities)
+    maturities = np.tile(np.arange(1, num_maturities + 1), num_currencies)
+
+    # Create 3D points (currency, yield, maturity)
+    points = np.column_stack((currencies, yields, maturities))
+
+    # Corresponding currency indices (1 to num_currencies)
+    currency_indices = np.arange(1, num_currencies + 1)
+
+    # Create tuples of (currency_index, yield) to interpolate against
+    query_points = np.column_stack((currency_indices, given_yields))
+
+    # Set up the 3D interpolation
+    interpolator = LinearNDInterpolator(points[:, :2], points[:, 2])
+
+    # Perform interpolation to find the corresponding maturities
+    corresponding_maturities_3d = interpolator(query_points)
+
+    return corresponding_maturities_3d
